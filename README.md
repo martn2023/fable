@@ -19,6 +19,8 @@
 
 </div>
 
+<!-- test edit by martn2023 -->
+
 Every conversation you've ever had with Claude Code is already saved on
 your machine — every decision, every debugging hunt, every 2 AM
 breakthrough, word for word. **Claude just isn't allowed to use it.**
