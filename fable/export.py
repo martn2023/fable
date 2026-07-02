@@ -7,6 +7,7 @@ import html as html_mod
 import json
 
 from fable import db as fdb
+from fable.db import connect
 from fable.jsonl import read_span
 from fable.threads import reconstruct
 
@@ -121,6 +122,35 @@ def export_thread_html(db_path: str, prompt_id: str) -> str:
             body.append(f"<p>{esc}</p>" if line.strip() else "")
     return HTML_SHELL.format(title=html_mod.escape(title),
                              body="\n".join(body))
+
+
+# There are many threads per session, we are making functions for full sessions, based on similar logic in export_thread_md
+def get_threads_by_session(db_path: str, session_id: str):
+    conn = fdb.connect(db_path)
+    try:
+        session = conn.execute(
+            "SELECT session_id "
+            "FROM sessions "
+            "WHERE session_id = ?", (session_id,)).fetchone()
+
+        if session is None:
+            raise KeyError(f"Session {session_id} doesn't exist")
+
+        # if we made it this far, that means the session_ID was verified in sessions table, but we dont know if there's any threads in threads table tied to this session_ID
+        threads_data_rows = conn.execute(
+            "SELECT prompt_id FROM threads "
+            "WHERE session_id = ? "
+            "ORDER BY first_ts", (session_id,)).fetchall()
+
+    finally:
+        conn.close() # need to close out the connection regardless of what is found in the above try
+
+    relevant_threads = []
+    for threads_data_row in threads_data_rows:
+        relevant_threads.append(threads_data_row[0])
+
+    return relevant_threads # it's possible to return an empty list
+
 
 
 def cmd_export(args) -> int:

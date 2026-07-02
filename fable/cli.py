@@ -330,7 +330,8 @@ def build_parser():
     sp.set_defaults(fn=cmd_costs)
 
     sp = sub.add_parser("export", help="export a thread as md/html")
-    sp.add_argument("prompt_id")
+    sp.add_argument("prompt_id", nargs="?")
+    sp.add_argument("--session", help="OPTIONAL: absorbs session id and exports all of the session's threads into a separate file") # expects 1 value, will error if user only types --session
     sp.add_argument("--format", choices=["md", "html"], default="md")
     sp.add_argument("-o", "--output")
     sp.add_argument("--gist", action="store_true",
